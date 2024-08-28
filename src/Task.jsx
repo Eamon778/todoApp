@@ -1,7 +1,6 @@
 import React, { useState, useRef } from "react";
 import plusIcon from './assets/plus.png';
 import xIcon from './assets/x.png'
-import saveIcon from './assets/save.png'
 import downArrow from './assets/down-arrow.png';
 import editIcon from './assets/edit.png'
 
@@ -51,15 +50,12 @@ function Task() {
                 </label>
             </div>
             {isAdding && (
-                <div className="flex items-center bg-[#eeeeee] h-[56px] px-5 my-4">
+                <div className="flex items-center justify-center bg-[#eeeeee] h-[56px] px-5 my-4">
                     <label className="label cursor-pointer">
                         <input type="checkbox" className="checkbox checkbox-error  border-none bg-black focus:border-none"/>
                     </label>
                     <input type="text" value={newLabel} onChange={handleLabelChange} className="outline-none bg-transparent p-2 w-full" placeholder="Enter new label"/>
-                    <button onClick={handleAddLabel} className="p-2 flex flex-col items-center mt-2">
-                        <img src={saveIcon} alt="" />
-                        <p className="text-[12px] font-semibold font-ttfirs">Save</p>
-                    </button>
+                    <button onClick={handleAddLabel} className="btn btn-outline text-[16px] font-bold px-2 h-8 min-h-8">Save</button>
                 </div>
             )}
             <div>
@@ -80,18 +76,16 @@ function Task() {
                             <div tabIndex={0} role="button" onClick={handleToggle} onBlur={() => setIsOpen(false)} className="relative">
                                 <img src={downArrow} className={`w-4 transform transition-transform duration-300 ${isOpen ? 'rotate-180' : 'rotate-0'}`} alt="Toggle dropdown"/>
                                 {isOpen && (
-                                    <ul className="menu dropdown-content bg-blue-600">
-                                        <li className="flex"><button><img src={editIcon} className="bg-red-600" alt="edit" />Edit</button></li>
-                                        <li><button>Add</button></li>
+                                    <ul className="menu dropdown-content">
+                                        <li><button className="flex items-center">Edit <img src={editIcon} className="w-4" alt="" /></button></li>
+                                        <li><button>Delete</button></li>
+                                        <li><button>Add Tasks</button></li>
                                     </ul>
                                 )}
                             </div>
                         </div>
                     </div>
                 ))}
-            </div>
-            <div>
-                <p>Hello World</p>
             </div>
         </div>
     );
