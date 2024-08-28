@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+    font-family: 'TT Firs Neue';
+    src: url('./fonts/TT Firs Neue.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
