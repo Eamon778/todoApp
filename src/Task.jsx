@@ -13,6 +13,8 @@ function Task() {
     const [editingLabelId, setEditingLabelId] = useState(null);
     const [editingLabelText, setEditingLabelText] = useState("");
     const [taskInputs, setTaskInputs] = useState({});
+    const [openDetails, setOpenDetails] = useState(null); // Track which label's collapse content is open
+    const [showTaskInput, setShowTaskInput] = useState(null); // Track which label's task input should be visible
     const checkboxRef = useRef(null);
 
     const handleCbChange = () => {
@@ -79,6 +81,15 @@ function Task() {
         }
     };
 
+    // New function to toggle task input visibility
+    const handleShowTaskInput = (labelId) => {
+        if (showTaskInput === labelId) {
+            setShowTaskInput(null); // Hide task input if already visible
+        } else {
+            setShowTaskInput(labelId); // Show task input for the clicked label
+        }
+    };
+
     return (
         <div className="max-w-md min-h-screen bg-white mx-auto">
             <div className="flex justify-between px-5">
@@ -101,60 +112,63 @@ function Task() {
             <div>
                 {labels.map(label => (
                     <div key={label.id} className="flex flex-col py-3 px-5 hover:bg-slate-200">
-                        <div tabIndex={0} className="collapse rounded-none">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center">
-                                    <label className="label me-2 cursor-pointer">
-                                        <input type="checkbox" className="checkbox checkbox-error border-none bg-black focus:border-none" />
-                                    </label>
-                                    {editingLabelId === label.id ? (
-                                        <input 
-                                            type="text" 
-                                            value={editingLabelText} 
-                                            onChange={handleEditingLabelChange} 
-                                            className="outline-none bg-transparent p-2 w-full text-lg font-medium" 
-                                        />
-                                    ) : (
-                                        <p className="text-lg font-medium">{label.label}</p>
-                                    )}
+                        <details tabIndex={0} className="collapse rounded-none" open={openDetails === label.id}>
+                            <summary className="collapse-title p-0">
+                                <div className="flex justify-between items-center">
+                                    <div className="flex items-center">
+                                        <label className="label me-2 cursor-pointer">
+                                            <input type="checkbox" className="checkbox checkbox-error border-none bg-black focus:border-none" />
+                                        </label>
+                                        {editingLabelId === label.id ? (
+                                            <input 
+                                                type="text" 
+                                                value={editingLabelText} 
+                                                onChange={handleEditingLabelChange} 
+                                                className="outline-none bg-transparent p-2 w-full text-lg font-medium" 
+                                            />
+                                        ) : (
+                                            <p className="text-lg font-medium">{label.label}</p>
+                                        )}
+                                    </div>
+                                    <ul className="flex items-center gap-3">
+                                        {editingLabelId === label.id ? (
+                                            <>
+                                                <li><button onClick={() => handleSaveEditedLabel(label.id)} className="btn btn-sm btn-outline">Save</button></li>
+                                                <li><button onClick={handleCancelEditing} className="btn btn-sm btn-outline">Cancel</button></li>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <li><button onClick={() => handleEditButtonClick(label)} id="editButton" className="flex items-center"><img src={editIcon} className="w-5" alt="" /></button></li>
+                                                <li><button onClick={() => handleRemoveLabel(label.id)} id="removeButton" className="flex items-center"><img src={removeIcon} className="w-5" alt="" /></button></li>
+                                                <li><button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleShowTaskInput(label.id); }} id="addButton" className="flex items-center"><img src={addIcon} className="w-6" alt="" /></button></li>
+                                            </>
+                                        )}
+                                    </ul>
                                 </div>
-                                <ul className="flex items-center gap-3">
-                                    {editingLabelId === label.id ? (
-                                        <>
-                                            <li><button onClick={() => handleSaveEditedLabel(label.id)} className="btn btn-sm btn-outline">Save</button></li>
-                                            <li><button onClick={handleCancelEditing} className="btn btn-sm btn-outline">Cancel</button></li>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <li><button onClick={() => handleEditButtonClick(label)} id="editButton" className="flex items-center"><img src={editIcon} className="w-5" alt="" /></button></li>
-                                            <li><button onClick={() => handleRemoveLabel(label.id)} id="removeButton" className="flex items-center"><img src={removeIcon} className="w-5" alt="" /></button></li>
-                                            <li><button onClick={() => setTaskInputs({ ...taskInputs, [label.id]: "" })} id="addButton" className="flex items-center"><img src={addIcon} className="w-6" alt="" /></button></li>
-                                        </>
-                                    )}
-                                </ul>
-                            </div>
+                            </summary>
                             <div className="collapse-content">
                                 <div className="my-2">
                                     {label.tasks.map((task, index) => (
                                         <p key={index} className="py-1">{task}</p>
                                     ))}
                                 </div>
-                                <div className="flex items-center">
-                                    <input
-                                        type="text"
-                                        value={taskInputs[label.id] || ""}
-                                        onChange={(e) => handleTaskInputChange(e, label.id)}
-                                        className="outline-none bg-transparent p-2 w-full"
-                                        placeholder="Enter new task"
-                                    />
-                                    <button onClick={() => handleAddTask(label.id)} className="btn btn-outline text-[16px] font-bold px-2 h-8 min-h-8">Add Task</button>
-                                </div>
+                                {showTaskInput === label.id && (
+                                    <div className="flex items-center">
+                                        <input
+                                            type="text"
+                                            value={taskInputs[label.id] || ""}
+                                            onChange={(e) => handleTaskInputChange(e, label.id)}
+                                            className="outline-none bg-transparent p-2 w-full"
+                                            placeholder="Enter new task"
+                                        />
+                                        <button onClick={() => handleAddTask(label.id)} className="btn btn-outline text-[16px] font-bold px-2 h-8 min-h-8">Add Task</button>
+                                    </div>
+                                )}
                             </div>
-                        </div>
+                        </details>
                     </div>
                 ))}
             </div>
-            <h1>Hello World</h1>
         </div>
     );
 }
