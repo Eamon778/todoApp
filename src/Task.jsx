@@ -13,8 +13,9 @@ function Task() {
     const [editingLabelId, setEditingLabelId] = useState(null);
     const [editingLabelText, setEditingLabelText] = useState("");
     const [taskInputs, setTaskInputs] = useState({});
-    const [openDetails, setOpenDetails] = useState(null); // Track which label's collapse content is open
     const [showTaskInput, setShowTaskInput] = useState(null); // Track which label's task input should be visible
+    const [editingTaskId, setEditingTaskId] = useState(null); // Track which task is being edited
+    const [editingTaskText, setEditingTaskText] = useState(""); // Track the text of the task being edited
     const checkboxRef = useRef(null);
 
     const handleCbChange = () => {
@@ -51,7 +52,7 @@ function Task() {
     };
 
     const handleSaveEditedLabel = (labelId) => {
-        setLabels(labels.map(label => 
+        setLabels(labels.map(label =>
             label.id === labelId ? { ...label, label: editingLabelText } : label
         ));
         setEditingLabelId(null);
@@ -78,16 +79,49 @@ function Task() {
                     : label
             ));
             setTaskInputs({ ...taskInputs, [labelId]: "" }); // Clear input after adding task
+            setShowTaskInput(null); // Hide task input after adding task
         }
     };
 
-    // New function to toggle task input visibility
+    // Toggle task input visibility
     const handleShowTaskInput = (labelId) => {
         if (showTaskInput === labelId) {
             setShowTaskInput(null); // Hide task input if already visible
         } else {
             setShowTaskInput(labelId); // Show task input for the clicked label
         }
+    };
+
+    // Handle editing a task
+    const handleEditTaskButtonClick = (taskIndex, taskText) => {
+        setEditingTaskId(taskIndex);
+        setEditingTaskText(taskText);
+    };
+
+    const handleEditingTaskChange = (e) => {
+        setEditingTaskText(e.target.value);
+    };
+
+    const handleSaveEditedTask = (labelId, taskIndex) => {
+        setLabels(labels.map(label =>
+            label.id === labelId
+                ? {
+                    ...label,
+                    tasks: label.tasks.map((task, index) =>
+                        index === taskIndex ? editingTaskText : task
+                    )
+                }
+                : label
+        ));
+        setEditingTaskId(null);
+    };
+
+    const handleRemoveTask = (labelId, taskIndex) => {
+        setLabels(labels.map(label =>
+            label.id === labelId
+                ? { ...label, tasks: label.tasks.filter((_, index) => index !== taskIndex) }
+                : label
+        ));
     };
 
     return (
@@ -112,7 +146,7 @@ function Task() {
             <div>
                 {labels.map(label => (
                     <div key={label.id} className="flex flex-col py-3 px-5 hover:bg-slate-200">
-                        <details tabIndex={0} className="collapse rounded-none" open={openDetails === label.id}>
+                        <details tabIndex={0} className="collapse rounded-none">
                             <summary className="collapse-title p-0">
                                 <div className="flex justify-between items-center">
                                     <div className="flex items-center">
@@ -149,7 +183,31 @@ function Task() {
                             <div className="collapse-content">
                                 <div className="my-2">
                                     {label.tasks.map((task, index) => (
-                                        <p key={index} className="py-1">{task}</p>
+                                        <div key={index} className="flex justify-between items-center py-1">
+                                            {editingTaskId === index ? (
+                                                <input
+                                                    type="text"
+                                                    value={editingTaskText}
+                                                    onChange={handleEditingTaskChange}
+                                                    className="outline-none bg-transparent p-2 w-full"
+                                                />
+                                            ) : (
+                                                <p className="flex-1">{task}</p>
+                                            )}
+                                            <div className="flex gap-2">
+                                                {editingTaskId === index ? (
+                                                    <>
+                                                        <button onClick={() => handleSaveEditedTask(label.id, index)} className="btn btn-sm btn-outline">Save</button>
+                                                        <button onClick={() => setEditingTaskId(null)} className="btn btn-sm btn-outline">Cancel</button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <button onClick={() => handleEditTaskButtonClick(index, task)} className="flex items-center"><img src={editIcon} className="w-5" alt="" /></button>
+                                                        <button onClick={() => handleRemoveTask(label.id, index)} className="flex items-center"><img src={removeIcon} className="w-5" alt="" /></button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
                                     ))}
                                 </div>
                                 {showTaskInput === label.id && (
